@@ -9,6 +9,7 @@
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -16,58 +17,71 @@
     <!-- endbuild -->
   </head>
   <body ng-app="dmscartoAngularGruntApp">
-    <!--[if lte IE 8]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
-
-    <!-- Add your site or application content here -->
-    <div class="header">
-      <div class="navbar navbar-default" role="navigation">
-        <div class="container">
-          <div class="navbar-header">
-
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#js-navbar-collapse">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-
-            <a class="navbar-brand" href="#/">dmscartoAngularGrunt</a>
-          </div>
-
-          <div class="collapse navbar-collapse" id="js-navbar-collapse">
-
-            <ul class="nav navbar-nav">
-              <li class="active"><a href="#/">Home</a></li>
-              <li><a ng-href="#/about">About</a></li>
-              <li><a ng-href="#/">Contact</a></li>
-            </ul>
-          </div>
+    <!--[if lte IE 8]> <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p> <![endif]-->
+    <section class="container-fluid content" ng-controller="MainCtrl">
+      <div class="row">
+        <div class="col-lg-3">
+          <h2>Positions GPS DMS</h2>
+          <md-autocomplete
+            ng-click='cleanMap()'
+            ng-disabled="isDisabled"
+            md-no-cache="noCache"
+            md-selected-item="selectedItem"
+            md-search-text-change="searchTextChange(searchText)"
+            md-search-text="searchText"
+            md-selected-item-change="selectedItemChange(item.DMSCODECHAUFFEUR); selectedItem.DMSCODECHAUFFEUR != null && getLivraisonsChauffeur(selectedItem.DMSCODECHAUFFEUR,data.sw1); selectedItem.DMSCODECHAUFFEUR != null && getTrajetChauffeur(selectedItem.DMSCODECHAUFFEUR,data.sw2);"
+            md-items="item in chauffeurs | unique: 'DMSCODECHAUFFEUR' | filter: searchText"
+            md-item-text="item.DMSCODECHAUFFEUR"
+            md-min-length="0"
+            placeholder="Quel chauffeur voulez vous suivre ?">
+            <md-item-template>
+              <span md-highlight-text="searchText" md-highlight-flags="^i">{{item.DMSCODECHAUFFEUR}}</span>
+            </md-item-template>
+            <md-not-found>
+              Aucun chauffeur pour "{{searchText}}"
+            </md-not-found>
+          </md-autocomplete>
+          <section class="btncarto">
+            <md-checkbox class="col-md-3 md-primary" ng-show="selectedItem.DMSCODECHAUFFEUR != null" ng-model="data.sw1" ng-change="getLivraisonsChauffeur(selectedItem.DMSCODECHAUFFEUR,data.sw1)">
+              Livraisons
+            </md-checkbox>
+            <md-checkbox class="col-md-3 md-primary" ng-show="selectedItem.DMSCODECHAUFFEUR != null" ng-model="data.sw2" ng-change="getTrajetChauffeur(selectedItem.DMSCODECHAUFFEUR,data.sw2)">
+              Trajet
+            </md-checkbox>
+            <!-- <md-checkbox class="col-md-3 md-primary" ng-show="selectedItem.DMSCODECHAUFFEUR != null" ng-model="data.sw2" ng-change="getTrajetChauffeur(selectedItem.DMSCODECHAUFFEUR,data.sw2)">
+              Positions
+            </md-checkbox> -->
+          </section>
+        </div>
+        <div class="col-lg-9">
+          <ui-gmap-google-map center='map.center' zoom='map.zoom' control='map.control' bounds='map.bounds'>
+            <ui-gmap-marker ng-repeat="m in map.markers" coords="m.coords" options="m.options" idkey="m.id">
+              <ui-gmap-window options="windowOptions" closeClick="closeClick()">
+                <div>{{m.infowindows}}</div>
+              </ui-gmap-window>
+            </ui-gmap-marker>
+            <ui-gmap-marker ng-repeat="h in map.home" coords="h.coords" options="h.options" idkey="h.id"></ui-gmap-marker>
+            <ui-gmap-polyline ng-repeat="p in polylines" path="p.path" stroke="p.stroke" visible='p.visible' geodesic='p.geodesic' fit="false" editable="p.editable" draggable="p.draggable" icons='p.icons'></ui-gmap-polyline>
+          </ui-gmap-google-map>
         </div>
       </div>
-    </div>
-
-    <div class="container">
-    <div ng-view=""></div>
-    </div>
-
-    <div class="footer">
-      <div class="container">
-        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
-      </div>
-    </div>
-
-
+    </section>
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
-     <script>
-       !function(A,n,g,u,l,a,r){A.GoogleAnalyticsObject=l,A[l]=A[l]||function(){
-       (A[l].q=A[l].q||[]).push(arguments)},A[l].l=+new Date,a=n.createElement(g),
-       r=n.getElementsByTagName(g)[0],a.src=u,r.parentNode.insertBefore(a,r)
-       }(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    <script>
+      !function(A, n, g, u, l, a, r) {
+        A.GoogleAnalyticsObject = l,
+        A[l] = A[l] || function() {
+          (A[l].q = A[l].q || []).push(arguments)
+        },
+        A[l].l =+ new Date,
+        a = n.createElement(g),
+        r = n.getElementsByTagName(g)[0],
+        a.src = u,
+        r.parentNode.insertBefore(a, r)
+      }(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-       ga('create', 'UA-XXXXX-X');
-       ga('send', 'pageview');
+      ga('create', 'UA-XXXXX-X');
+      ga('send', 'pageview');
     </script>
 
     <!-- build:js(.) scripts/vendor.js -->
@@ -75,19 +89,26 @@
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="bower_components/angular-animate/angular-animate.js"></script>
-    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
-    <script src="bower_components/angular-resource/angular-resource.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
-    <script src="bower_components/angular-touch/angular-touch.js"></script>
+    <script src="bower_components/angular-simple-logger/dist/angular-simple-logger.js"></script>
+    <script src="bower_components/lodash/lodash.js"></script>
+    <script src="bower_components/angular-google-maps/dist/angular-google-maps.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.js"></script>
+    <script src="bower_components/angular-messages/angular-messages.js"></script>
+    <script src="bower_components/angular-material/angular-material.js"></script>
+    <script src="bower_components/angular-filter/dist/angular-filter.min.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
-        <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="scripts/app.js"></script>
-        <script src="scripts/controllers/main.js"></script>
-        <script src="scripts/controllers/about.js"></script>
-        <!-- endbuild -->
-</body>
+    <!-- build:js({.tmp,app}) scripts/scripts.js -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/main.js"></script>
+    <script src="scripts/controllers/about.js"></script>
+    <script src="scripts/services/listchauffeur.js"></script>
+    <script src="scripts/services/suivilivservice.js"></script>
+    <script src="scripts/services/suivigpsservice.js"></script>
+    <!-- endbuild -->
+  </body>
 </html>

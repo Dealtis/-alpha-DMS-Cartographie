@@ -10,14 +10,23 @@
  */
 angular
   .module('dmscartoAngularGruntApp', [
-    'ngAnimate',
-    'ngCookies',
-    'ngResource',
     'ngRoute',
     'ngSanitize',
-    'ngTouch'
-  ])
-  .config(function ($routeProvider) {
+    'ngMaterial',
+    'angular.filter',
+    'uiGmapgoogle-maps'
+  ]).filter('split', function() {
+    return function(input, splitChar, splitIndex) {
+      // do some bounds checking here to ensure it has that index
+      return input.split(splitChar)[splitIndex];
+    }
+  })
+  .config(function(uiGmapGoogleMapApiProvider) {
+    uiGmapGoogleMapApiProvider.configure({
+      libraries: 'geometry,visualization'
+    });
+  })
+  .config(function($routeProvider) {
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
